@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -32,7 +33,7 @@ func main() {
 					&cli.StringFlag{
 						Name:    "host",
 						Aliases: []string{"H"},
-						Value:   "localhost",
+						Value:   "0.0.0.0",
 						Usage:   "Host to listen on",
 					},
 				},
@@ -49,6 +50,14 @@ func main() {
 }
 
 func runServer(host string, port int) error {
+	// Railway의 PORT 환경변수 사용 (Railway 배포시 자동 할당)
+	envPort := os.Getenv("PORT")
+	if envPort != "" {
+		if p, err := strconv.Atoi(envPort); err == nil {
+			port = p
+		}
+	}
+
 	// Create server address
 	addr := fmt.Sprintf("%s:%d", host, port)
 
