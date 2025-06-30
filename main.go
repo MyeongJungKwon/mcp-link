@@ -64,8 +64,11 @@ func runServer(host string, port int) error {
 	// Configure the SSE server
 	ss := utils.NewSSEServer()
 
+	// Create a custom handler that wraps the SSE server with additional routes
+	handler := &customHandler{sseServer: ss}
+
 	// Create HTTP server with CORS middleware
-	corsHandler := corsMiddleware(ss)
+	corsHandler := corsMiddleware(handler)
 	server := &http.Server{
 		Addr:    addr,
 		Handler: corsHandler,
@@ -102,6 +105,45 @@ func runServer(host string, port int) error {
 
 	fmt.Println("Server gracefully stopped")
 	return nil
+}
+
+// customHandler wraps the SSE server and adds additional routes
+type customHandler struct {
+	sseServer http.Handler
+}
+
+func (h *customHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// Handle root path for health checks
+	if r.URL.Path == "/" {
+		if r.Method == http.MethodGet {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprintf(w, `{
+				"status": "healthy",
+				"service": "MCP Link Server",
+				"version": "1.0.0",
+				"endpoints": {
+					"sse": "/sse",
+					"message": "/message"
+				},
+				"description": "Convert Any OpenAPI V3 API to MCP Server"
+			}`)
+			return
+		}
+	}
+
+	// Handle status endpoint
+	if r.URL.Path == "/status" || r.URL.Path == "/health" {
+		if r.Method == http.MethodGet {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprintf(w, `{"status": "ok", "timestamp": "%s"}`, time.Now().UTC().Format(time.RFC3339))
+			return
+		}
+	}
+
+	// Delegate to SSE server for all other requests
+	h.sseServer.ServeHTTP(w, r)
 }
 
 // corsMiddleware adds CORS headers to allow requests from any origin
