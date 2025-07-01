@@ -1,5 +1,5 @@
 [phases.build]
-cmd = "go build -o main ."
+cmd = "go build -o app ."
 
 [phases.start]
-cmd = "./main serve --host 0.0.0.0 --port $PORT"
+cmd = "./app serve --host 0.0.0.0 --port $PORT"
