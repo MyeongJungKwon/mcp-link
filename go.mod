@@ -1,8 +1,6 @@
-module github.com/anyisalin/mcp-openapi-to-mcp-adapter
+module github.com/MyeongJungKwon/mcp-link
 
-go 1.23.0
-
-toolchain go1.23.7
+go 1.21
 
 require (
 	github.com/getkin/kin-openapi v0.131.0
