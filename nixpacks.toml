@@ -1,5 +1,0 @@
-[phases.build]
-cmd = "go build -o app ."
-
-[phases.start]
-cmd = "./app serve --host 0.0.0.0 --port $PORT"
