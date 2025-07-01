@@ -113,9 +113,13 @@ type customHandler struct {
 }
 
 func (h *customHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// Log all requests for debugging
+	fmt.Printf("Request: %s %s\n", r.Method, r.URL.Path)
+	
 	// Handle /connect-api endpoint
 	if r.URL.Path == "/connect-api" {
 		if r.Method == http.MethodGet {
+			fmt.Println("Serving connect-api.html...")
 			http.ServeFile(w, r, "./static/connect-api.html")
 			return
 		}
@@ -129,7 +133,7 @@ func (h *customHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, `{
 				"status": "healthy",
 				"service": "MCP Link Server",
-				"version": "1.0.0",
+				"version": "1.0.1",
 				"endpoints": {
 					"sse": "/sse",
 					"message": "/message",
