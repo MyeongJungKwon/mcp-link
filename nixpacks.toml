@@ -1,5 +1,5 @@
 [phases.setup]
-cmd = "go mod tidy"
+cmd = "go mod tidy && go mod download"
 
 [phases.build]
 cmd = "go build -o main ."

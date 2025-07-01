@@ -1,4 +1,4 @@
-module github.com/anyisalin/mcp-openapi-to-mcp-adapter
+module github.com/MyeongJungKwon/mcp-link
 
 go 1.21
 

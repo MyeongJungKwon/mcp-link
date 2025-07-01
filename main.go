@@ -11,7 +11,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/anyisalin/mcp-openapi-to-mcp-adapter/utils"
+	"github.com/MyeongJungKwon/mcp-link/utils"
 	"github.com/urfave/cli/v2"
 )
 
