@@ -116,7 +116,7 @@ func (h *customHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Handle /connect-api endpoint
 	if r.URL.Path == "/connect-api" {
 		if r.Method == http.MethodGet {
-			http.ServeFile(w, r, "static/connect-api.html")
+			http.ServeFile(w, r, "./static/connect-api.html")
 			return
 		}
 	}
