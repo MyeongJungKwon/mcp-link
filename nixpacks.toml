@@ -1,8 +1,0 @@
-[phases.setup]
-cmd = "go mod tidy && go mod download"
-
-[phases.build]
-cmd = "go build -o main ."
-
-[phases.start]
-cmd = "./main serve --host 0.0.0.0 --port $PORT"
