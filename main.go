@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -32,7 +33,7 @@ func main() {
 					&cli.StringFlag{
 						Name:    "host",
 						Aliases: []string{"H"},
-						Value:   "localhost",
+						Value:   "0.0.0.0",
 						Usage:   "Host to listen on",
 					},
 				},
@@ -49,14 +50,44 @@ func main() {
 }
 
 func runServer(host string, port int) error {
+	// Railway의 PORT 환경변수 사용 (Railway 배포시 자동 할당)
+	envPort := os.Getenv("PORT")
+	if envPort != "" {
+		if p, err := strconv.Atoi(envPort); err == nil {
+			port = p
+		}
+	}
+
 	// Create server address
 	addr := fmt.Sprintf("%s:%d", host, port)
 
 	// Configure the SSE server
 	ss := utils.NewSSEServer()
 
+	// Create a new ServeMux for routing
+	mux := http.NewServeMux()
+	
+	// Add static file serving for /connect-api
+	mux.HandleFunc("/connect-api", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "static/connect-api.html")
+	})
+	
+	// Add root redirect to connect-api
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/" {
+			http.Redirect(w, r, "/connect-api", http.StatusFound)
+			return
+		}
+		// For all other paths, use the SSE server
+		ss.ServeHTTP(w, r)
+	})
+	
+	// Handle SSE endpoints
+	mux.Handle("/sse", ss)
+	mux.Handle("/message", ss)
+
 	// Create HTTP server with CORS middleware
-	corsHandler := corsMiddleware(ss)
+	corsHandler := corsMiddleware(mux)
 	server := &http.Server{
 		Addr:    addr,
 		Handler: corsHandler,
