@@ -40,3 +40,31 @@ Example usage:
 ```
 https://your-app.railway.app/sse?s=[OpenAPI-Spec-URL]&u=[API-Base-URL]&h=[Auth-Header]
 ```
+
+## Frontend Interface
+
+Access the web interface at:
+```
+https://your-app.railway.app/connect-api
+```
+
+## Testing Your Deployment
+
+Once deployed, you can test with:
+
+### Health Check
+```
+GET https://your-app.railway.app/
+```
+
+### Example MCP Link Usage
+```
+https://your-app.railway.app/sse?s=https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.json&u=https://api.github.com
+```
+
+## Performance Notes
+
+- First deployment may take 3-5 minutes due to Go module downloads
+- Railway free tier includes 500 hours per month
+- App will sleep when inactive and wake up on first request
+- Consider Railway Pro for production workloads

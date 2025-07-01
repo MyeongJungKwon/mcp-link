@@ -31,6 +31,19 @@ MCP Link solves these issues through automation and standardization, allowing an
 
 Try our hosted version at [mcp-link.vercel.app](https://mcp-link.vercel.app) to quickly convert and test your APIs without installation.
 
+## 🚂 Railway Deployment
+
+This repository is ready for one-click deployment on Railway!
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/QwDJGO?referralCode=alphasec)
+
+### Quick Deploy Steps:
+1. Click the Railway button above
+2. Connect your GitHub account
+3. Deploy automatically with Railway
+4. Your MCP Link server will be live in minutes!
+
+For detailed deployment instructions, see [RAILWAY_DEPLOY.md](RAILWAY_DEPLOY.md).
 
 ## 🚀 Quick Start
 
@@ -38,8 +51,8 @@ Try our hosted version at [mcp-link.vercel.app](https://mcp-link.vercel.app) to 
 
 ```bash
 # Clone repository
-git clone https://github.com/automation-ai-labs/mcp-link.git
-cd mcp-openapi-to-mcp-adapter
+git clone https://github.com/MyeongJungKwon/mcp-link.git
+cd mcp-link
 
 # Install dependencies
 go mod download

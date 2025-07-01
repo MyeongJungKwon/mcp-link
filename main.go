@@ -64,30 +64,11 @@ func runServer(host string, port int) error {
 	// Configure the SSE server
 	ss := utils.NewSSEServer()
 
-	// Create a new ServeMux for routing
-	mux := http.NewServeMux()
-	
-	// Add static file serving for /connect-api
-	mux.HandleFunc("/connect-api", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "static/connect-api.html")
-	})
-	
-	// Add root redirect to connect-api
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/" {
-			http.Redirect(w, r, "/connect-api", http.StatusFound)
-			return
-		}
-		// For all other paths, use the SSE server
-		ss.ServeHTTP(w, r)
-	})
-	
-	// Handle SSE endpoints
-	mux.Handle("/sse", ss)
-	mux.Handle("/message", ss)
+	// Create a custom handler that wraps the SSE server with additional routes
+	handler := &customHandler{sseServer: ss}
 
 	// Create HTTP server with CORS middleware
-	corsHandler := corsMiddleware(mux)
+	corsHandler := corsMiddleware(handler)
 	server := &http.Server{
 		Addr:    addr,
 		Handler: corsHandler,
@@ -124,6 +105,54 @@ func runServer(host string, port int) error {
 
 	fmt.Println("Server gracefully stopped")
 	return nil
+}
+
+// customHandler wraps the SSE server and adds additional routes
+type customHandler struct {
+	sseServer http.Handler
+}
+
+func (h *customHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// Handle /connect-api endpoint
+	if r.URL.Path == "/connect-api" {
+		if r.Method == http.MethodGet {
+			http.ServeFile(w, r, "static/connect-api.html")
+			return
+		}
+	}
+
+	// Handle root path for health checks
+	if r.URL.Path == "/" {
+		if r.Method == http.MethodGet {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprintf(w, `{
+				"status": "healthy",
+				"service": "MCP Link Server",
+				"version": "1.0.0",
+				"endpoints": {
+					"sse": "/sse",
+					"message": "/message",
+					"connect-api": "/connect-api"
+				},
+				"description": "Convert Any OpenAPI V3 API to MCP Server"
+			}`)
+			return
+		}
+	}
+
+	// Handle status endpoint
+	if r.URL.Path == "/status" || r.URL.Path == "/health" {
+		if r.Method == http.MethodGet {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprintf(w, `{"status": "ok", "timestamp": "%s"}`, time.Now().UTC().Format(time.RFC3339))
+			return
+		}
+	}
+
+	// Delegate to SSE server for all other requests
+	h.sseServer.ServeHTTP(w, r)
 }
 
 // corsMiddleware adds CORS headers to allow requests from any origin
